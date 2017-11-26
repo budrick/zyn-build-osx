@@ -46,6 +46,13 @@ case `sw_vers -productVersion | cut -d'.' -f1,2` in
 		GLOBAL_CXXFLAGS="-O3 -Wno-error=unused-command-line-argument -mmacosx-version-min=10.9 -DMAC_OS_X_VERSION_MAX_ALLOWED=1090"
 		GLOBAL_LDFLAGS="-mmacosx-version-min=10.9 -DMAC_OS_X_VERSION_MAX_ALLOWED=1090 -headerpad_max_install_names"
 		;;
+	"10.11")
+		echo "Sierra"
+		GLOBAL_CPPFLAGS="-Wno-error=unused-command-line-argument"
+		GLOBAL_CFLAGS="-O3 -Wno-error=unused-command-line-argument"
+		GLOBAL_CXXFLAGS="-O3 -Wno-error=unused-command-line-argument"
+		GLOBAL_LDFLAGS="-headerpad_max_install_names"
+		;;
 	*)
 		echo "**UNTESTED OSX VERSION**"
 		echo "if it works, please report back :)"
@@ -188,9 +195,11 @@ tar xzf ${SRCDIR}/jack_osx_dev.tar.gz
 ## it's optional for zynaddsubfx, since zyn needs C++11 and there's no
 ## easy way to build PPC binaries with a C++11 compiler we don't care..
 
-src portaudio tgz http://portaudio.com/archives/pa_stable_v19_20140130.tgz
+# src portaudio tgz http://www.portaudio.com/archives/pa_stable_v190600_20161030.tgz
+git clone https://git.assembla.com/portaudio.git ${BUILDD}/portaudio
 if ! echo "$OSXARCH" | grep -q "ppc"; then
-	autoconfbuild --enable-mac-universal --enable-static=no
+	cd ${BUILDD}/portaudio
+	autoconfbuild --enable-mac-universal=no --enable-cxx
 fi
 
 ################################################################################
@@ -256,7 +265,7 @@ autoconfbuild --with-our-malloc --disable-mpi
 
 ################################################################################
 
-src mxml-2.9 tar.gz http://www.msweet.org/files/project3/mxml-2.9.tar.gz
+src mxml-2.9 tar.gz https://github.com/michaelrsweet/mxml/releases/download/release-2.9/mxml-2.9.tar.gz
 ## DSOFLAGS ? which standard did they read?
 DSOFLAGS="${OSXARCH}${GLOBAL_LDFLAGS:+ $GLOBAL_LDFLAGS}" \
 autoconfbuild --disable-shared --enable-static
@@ -267,11 +276,11 @@ make -i install TARGETS=""
 ################################################################################
 
 ## project with tar-ball name != unzipped folder
-download fltk-1.3.3-source.tar.gz http://fltk.org/pub/fltk/1.3.3/fltk-1.3.3-source.tar.gz
+download fltk-1.3.4-source.tar.gz http://fltk.org/pub/fltk/1.3.4/fltk-1.3.4-source.tar.gz
 cd ${BUILDD}
-rm -rf fltk-1.3.3
-tar xzf ${SRCDIR}/fltk-1.3.3-source.tar.gz
-cd fltk-1.3.3
+rm -rf fltk-1.3.4
+tar xzf ${SRCDIR}/fltk-1.3.4-source.tar.gz
+cd fltk-1.3.4
 autoconfbuild
 
 ## stack built complete
